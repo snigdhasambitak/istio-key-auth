@@ -1,0 +1,30 @@
+{{- $kind := ternary "ClusterRole" "Role" .Values.clusterWide }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ $kind }}
+metadata:
+  name: {{ include "ika.name" . }}
+  {{- if not .Values.clusterWide }}
+  namespace: {{ include "ika.keysNamespace" . }}
+  {{- end }}
+  labels: {{- include "ika.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: {{ $kind }}Binding
+metadata:
+  name: {{ include "ika.name" . }}
+  {{- if not .Values.clusterWide }}
+  namespace: {{ include "ika.keysNamespace" . }}
+  {{- end }}
+  labels: {{- include "ika.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: {{ $kind }}
+  name: {{ include "ika.name" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "ika.name" . }}
+    namespace: {{ .Release.Namespace }}

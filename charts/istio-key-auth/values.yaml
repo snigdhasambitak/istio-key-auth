@@ -1,0 +1,32 @@
+image:
+  repository: ghcr.io/snigdhasambitak/istio-key-auth
+  # Defaults to the chart's appVersion.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+# Namespace whose labelled Secrets hold the API keys. Empty reads every namespace and needs clusterWide: true.
+keysNamespace: ""
+clusterWide: false
+
+keyHeader: x-api-key
+# Also accept "Authorization: <scheme> <key>". Empty disables it.
+authorizationScheme: ApiKey
+# Also accept the key as this query parameter, for callers that cannot set headers. Keys in URLs reach access logs.
+keyQueryParam: ""
+clientHeader: x-api-client
+# Passes the client's groups upstream, comma separated. Empty disables it.
+groupsHeader: x-api-client-groups
+stripKey: true
+# Must match pathPrefix on an envoyExtAuthzHttp provider, if you use the HTTP mode.
+httpPathPrefix: ""
+
+resources:
+  requests: {cpu: 50m, memory: 64Mi}
+  limits: {memory: 128Mi}
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

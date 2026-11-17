@@ -1,0 +1,10 @@
+# For `make run` outside Kubernetes. Prefer keyEnv over key so real keys stay out of files.
+clients:
+  - name: local-dev
+    key: dev-key-change-me
+    pathPrefixes: ["/"]
+  - name: read-only-partner
+    keyEnv: PARTNER_API_KEY
+    methods: ["GET", "HEAD"]
+    groups: ["partners"]
+    expiresAt: 2027-12-31T23:59:59Z

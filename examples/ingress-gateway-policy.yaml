@@ -1,0 +1,19 @@
+# Require an API key at the edge instead of per workload: every request through the ingress gateway to
+# api.example.com/partners/ needs a key, and other hosts and paths are left alone.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: partner-api-keys
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  action: CUSTOM
+  provider:
+    name: istio-key-auth
+  rules:
+    - to:
+        - operation:
+            hosts: ["api.example.com"]
+            paths: ["/partners/*"]

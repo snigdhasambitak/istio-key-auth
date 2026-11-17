@@ -1,0 +1,16 @@
+# Register the authorizer with Istio as an extension provider (istioctl, IstioOperator or the istio Helm values).
+# Use the gRPC provider; the HTTP one is there for meshes that cannot reach gRPC services.
+meshConfig:
+  extensionProviders:
+    - name: istio-key-auth
+      envoyExtAuthzGrpc:
+        service: istio-key-auth.istio-key-auth.svc.cluster.local
+        port: 9001
+        timeout: 0.5s
+    - name: istio-key-auth-http
+      envoyExtAuthzHttp:
+        service: istio-key-auth.istio-key-auth.svc.cluster.local
+        port: 8000
+        pathPrefix: /check
+        includeRequestHeadersInCheck: ["x-api-key", "authorization"]
+        headersToUpstreamOnAllow: ["x-api-client", "x-api-client-groups"]

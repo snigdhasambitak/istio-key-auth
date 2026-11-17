@@ -1,0 +1,17 @@
+# Require an API key for every request to the orders service, except its health check.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: require-api-key
+  namespace: shop
+spec:
+  selector:
+    matchLabels:
+      app: orders
+  action: CUSTOM
+  provider:
+    name: istio-key-auth
+  rules:
+    - to:
+        - operation:
+            notPaths: ["/healthz"]

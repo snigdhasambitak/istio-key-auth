@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ika.name" . }}
+  labels: {{- include "ika.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{- include "ika.selector" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "ika.labels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "ika.name" . }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: istio-key-auth
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --namespace={{ if .Values.clusterWide }}{{ .Values.keysNamespace }}{{ else }}{{ include "ika.keysNamespace" . }}{{ end }}
+            - --key-header={{ .Values.keyHeader }}
+            - --authorization-scheme={{ .Values.authorizationScheme }}
+            - --key-query-param={{ .Values.keyQueryParam }}
+            - --client-header={{ .Values.clientHeader }}
+            - --groups-header={{ .Values.groupsHeader }}
+            - --strip-key={{ .Values.stripKey }}
+            - --http-path-prefix={{ .Values.httpPathPrefix }}
+          ports:
+            - {name: grpc, containerPort: 9001}
+            - {name: http, containerPort: 8000}
+            - {name: ops, containerPort: 9090}
+          readinessProbe:
+            httpGet: {path: /readyz, port: ops}
+          livenessProbe:
+            httpGet: {path: /healthz, port: ops}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}

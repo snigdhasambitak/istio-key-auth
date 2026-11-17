@@ -1,0 +1,10 @@
+apiVersion: v2
+name: istio-key-auth
+description: API key authorization for Istio through the ext_authz extension provider
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/snigdhasambitak/istio-key-auth
+sources:
+  - https://github.com/snigdhasambitak/istio-key-auth
+keywords: [istio, envoy, ext-authz, api-key, authorization]
